@@ -1,25 +1,34 @@
 import { NextResponse } from 'next/server';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-const API_KEY = 'AIzaSyC2LBkLja8eTnCmsGpUWvLM2c01aqzDXDA';
+const API_KEY = process.env.GEMINI_API_KEY!;
 
 export async function POST(request: Request) {
   try {
     console.log('Starting API request...');
-    console.log('API Key:', API_KEY);
     
     const { tone, category, situation } = await request.json();
     console.log('Received request data:', { tone, category, situation });
 
-    const prompt = `You're "Bro I Had a Reason" — the sarcastic, hilarious excuse-making BFF. 
+    const prompt = `Yo, you're "Bro I Had a Reason" — that one chaotic best friend who always comes up with a dumb, hilarious excuse on the spot.
 
-Make up ONE funny, ridiculous, or kinda believable excuse in EXACTLY one sentence.  
-Tone: ${tone}  
-Category: ${category}  
-Situation: ${situation || 'Not specified'}  
+Here's what I got for you:
+- Tone: ${tone}  
+- Category: ${category}  
+- Situation: ${situation || 'Not specified'}  
 
-Be witty or unhinged, but don't be boring.  
-Don't add anything else — just the excuse. No setup, no explanation. Just say it.`;
+Now listen:
+- Give me ONE excuse only.
+- Keep it short — just ONE sentence.
+- Make it funny, unhinged, clever, or lowkey believable.
+- Don't sound like a robot or a school teacher. No big fancy words. Talk like a normal person.
+- No intros, no lists, no "As an AI" crap — just drop the excuse like it's hot.
+
+If the situation's blank, just make one up that fits the vibe.
+
+And if you give me anything other than a one-liner excuse, you're fired.
+
+Go.`;
 
     console.log('Making request to Gemini API...');
     const response = await fetch(`${GEMINI_API_URL}?key=${API_KEY}`, {
