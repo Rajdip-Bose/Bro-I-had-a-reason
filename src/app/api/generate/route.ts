@@ -42,11 +42,11 @@ Your job:
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Gemini API Error:', errorData);
-      throw new Error('Failed to generate excuse');
+      throw new Error(`API Error: ${errorData.error?.message || 'Failed to generate excuse'}`);
     }
 
     const data = await response.json();
-    console.log('Gemini API Response:', data); // Add this for debugging
+    console.log('Gemini API Response:', data);
 
     // Extract the excuse from the response
     const excuse = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -60,7 +60,7 @@ Your job:
   } catch (error) {
     console.error('Error generating excuse:', error);
     return NextResponse.json(
-      { error: 'Failed to generate excuse. Please try again.' },
+      { error: error instanceof Error ? error.message : 'Failed to generate excuse. Please try again.' },
       { status: 500 }
     );
   }
