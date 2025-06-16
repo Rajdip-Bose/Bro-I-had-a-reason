@@ -40,41 +40,47 @@ export default function Home() {
 
   // Prevent text selection
   useEffect(() => {
-    const preventSelection = () => window.getSelection().empty();
+    const preventSelection = () => {
+      const selection = window.getSelection();
+      if (selection) selection.empty();
+    };
+
     document.body.style.userSelect = 'none';
-    document.body.style.webkitUserSelect = 'none';
-    document.body.style.msUserSelect = 'none';
-    document.body.style.mozUserSelect = 'none';
+    // document.body.style.webkitUserSelect = 'none';
+    // document.body.style.msUserSelect = 'none';
+    // document.body.style.mozUserSelect = 'none';
+
     document.addEventListener('selectstart', preventSelection);
     return () => document.removeEventListener('selectstart', preventSelection);
   }, []);
+
 
   // Canvas Blob Animation
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = (canvas as HTMLCanvasElement).getContext('2d');
     if (!ctx) return;
 
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
+    let width = (canvas as HTMLCanvasElement).width = window.innerWidth;
+    let height = (canvas as HTMLCanvasElement).height = window.innerHeight;
     let time = 0;
 
     function drawBlob() {
-      const bgGradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.max(width, height) / 1.4);
+      const bgGradient = ctx!.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.max(width, height) / 1.4);
       bgGradient.addColorStop(0, '#050505');
       bgGradient.addColorStop(0.5, '#0f0f0f');
       bgGradient.addColorStop(1, '#1e1e1e');
-      ctx.fillStyle = bgGradient;
-      ctx.fillRect(0, 0, width, height);
+      ctx!.fillStyle = bgGradient;
+      ctx!.fillRect(0, 0, width, height);
 
       const minDim = Math.min(width, height);
       const baseRadius = minDim * 0.4;
       const centerX = width / 2 + Math.sin(time * 0.003) * 40 + Math.cos(time * 0.007) * 20;
       const centerY = height / 2 + Math.cos(time * 0.005) * 30 + Math.sin(time * 0.009) * 20;
 
-      ctx.beginPath();
+      ctx!.beginPath();
       for (let i = 0; i <= blobPoints; i++) {
         const angle = (i / blobPoints) * Math.PI * 2;
         const wave = Math.sin(angle + time * 0.008) * 25 +
@@ -83,12 +89,12 @@ export default function Home() {
         const radius = baseRadius + wave;
         const x = centerX + Math.cos(angle) * radius;
         const y = centerY + Math.sin(angle) * radius;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        if (i === 0) ctx!.moveTo(x, y);
+        else ctx!.lineTo(x, y);
       }
-      ctx.closePath();
+      ctx!.closePath();
 
-      const gradient = ctx.createRadialGradient(
+      const gradient = ctx!.createRadialGradient(
         centerX - 30,
         centerY - 30,
         baseRadius * 0.3,
@@ -100,15 +106,15 @@ export default function Home() {
       gradient.addColorStop(0.5, '#3b82f6');
       gradient.addColorStop(1, '#1e3a8a');
 
-      ctx.fillStyle = gradient;
-      ctx.fill();
+      ctx!.fillStyle = gradient;
+      ctx!.fill();
 
-      ctx.shadowBlur = 25;
-      ctx.shadowColor = 'rgba(59, 130, 246, 0.7)';
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.9)';
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+      ctx!.shadowBlur = 25;
+      ctx!.shadowColor = 'rgba(59, 130, 246, 0.7)';
+      ctx!.strokeStyle = 'rgba(59, 130, 246, 0.9)';
+      ctx!.lineWidth = 2.5;
+      ctx!.stroke();
+      ctx!.shadowBlur = 0;
 
       time += 1;
       requestAnimationFrame(drawBlob);
@@ -117,8 +123,8 @@ export default function Home() {
     drawBlob();
 
     const resizeCanvas = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      width = (canvas as HTMLCanvasElement).width = window.innerWidth;
+      height = (canvas as HTMLCanvasElement).height = window.innerHeight;
     };
 
     window.addEventListener('resize', resizeCanvas);
@@ -323,12 +329,12 @@ export default function Home() {
 }
 
 // Custom Select Component
-const CustomSelect = ({ options, value, onChange }) => {
+const CustomSelect = ({ options, value, onChange }: { options: string[], value: string, onChange: (option: string) => void }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef(null);
 
-  const handleClickOutside = (e) => {
-    if (ref.current && !ref.current.contains(e.target)) {
+  const handleClickOutside = (e: MouseEvent) => {
+    if (ref.current && !(ref.current as HTMLElement).contains(e.target as Node)) {
       setIsOpen(false);
     }
   };
@@ -338,7 +344,7 @@ const CustomSelect = ({ options, value, onChange }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleOptionClick = (option) => {
+  const handleOptionClick = (option: string) => {
     onChange(option);
     setIsOpen(false);
   };
@@ -368,7 +374,7 @@ const CustomSelect = ({ options, value, onChange }) => {
               className="px-4 py-2 hover:bg-white/10 cursor-pointer transition-colors text-base sm:text-lg"
               onClick={() => handleOptionClick(option)}
             >
-              
+
               {option}
             </div>
           ))}
