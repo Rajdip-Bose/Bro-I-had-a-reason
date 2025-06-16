@@ -368,6 +368,7 @@ const CustomSelect = ({ options, value, onChange }) => {
               className="px-4 py-2 hover:bg-white/10 cursor-pointer transition-colors text-base sm:text-lg"
               onClick={() => handleOptionClick(option)}
             >
+              
               {option}
             </div>
           ))}
