@@ -151,44 +151,44 @@ export default function Home() {
     }
   }, [tone, category, customReason]);
 
-// Real API Call
-const generateExcuse = async () => {
-  setStep('loading');
-  const loadingMessages = [
-    "Rolling the dice of fate",
-    "Consulting the council of goblins",
-    "Gaslighting in progress",
-    "Summoning chaotic energy",
-    "Rewriting history creatively"
-  ];
+  // Real API Call
+  const generateExcuse = async () => {
+    setStep('loading');
+    const loadingMessages = [
+      "Rolling the dice of fate",
+      "Consulting the council of goblins",
+      "Gaslighting in progress",
+      "Summoning chaotic energy",
+      "Rewriting history creatively"
+    ];
 
-  // Pick a random message
-  const selectedMessage = loadingMessages[
-    Math.floor(Math.random() * loadingMessages.length)
-  ];
+    // Pick a random message
+    const selectedMessage = loadingMessages[
+      Math.floor(Math.random() * loadingMessages.length)
+    ];
 
-  // Show full message with ...
-  setLoadingMessage(`${selectedMessage}...`);
+    // Show full message with ...
+    setLoadingMessage(`${selectedMessage}...`);
 
-  // Wait 1 second, then make API call
-  setTimeout(() => {
-    fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tone, category, situation: customReason }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        setExcuse(data.excuse);
-        setStep('result');
+    // Wait 1 second, then make API call
+    setTimeout(() => {
+      fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tone, category, situation: customReason }),
       })
-      .catch(err => {
-        console.error('API Error:', err);
-        setError('Error generating excuse. Please try again.');
-        setStep('form');
-      });
-  }, 1000);
-};
+        .then(res => res.json())
+        .then(data => {
+          setExcuse(data.excuse);
+          setStep('result');
+        })
+        .catch(err => {
+          console.error('API Error:', err);
+          setError('Error generating excuse. Please try again.');
+          setStep('form');
+        });
+    }, 1000);
+  };
   const [loadingMessage, setLoadingMessage] = useState('');
 
   return (
@@ -211,10 +211,11 @@ const generateExcuse = async () => {
         {/* Headings */}
         <div className="text-center w-full max-w-3xl mb-8 px-4">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold whitespace-nowrap text-center"
-            style={{ textShadow: '0 2px 4px rgba(0, 0, 0, 0.6)',
+            style={{
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.6)',
               fontSize: 'clamp(2.1rem, 5vw, 3rem)', // Responsive scaling
-             }}
-            
+            }}
+
           >
             Bro I Had a Reason
           </h1>
@@ -303,8 +304,6 @@ const generateExcuse = async () => {
                 onClick={(e) => {
                   e.stopPropagation();
                   navigator.clipboard.writeText(excuse);
-
-                  // Show copied notification
                   const copiedEl = document.getElementById('copied-notification');
                   if (copiedEl) {
                     copiedEl.style.opacity = '1';
@@ -315,7 +314,7 @@ const generateExcuse = async () => {
                     }, 1000);
                   }
                 }}
-                className="absolute bottom-3 right-4 text-white/70 hover:text-white transition-all duration-200"
+                className="absolute bottom-3 right-4 text-white/70 hover:text-white transition-all duration-200 z-10"
                 title="Copy to clipboard"
               >
                 📋
