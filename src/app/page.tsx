@@ -228,13 +228,13 @@ const generateExcuse = async () => {
             }}
           >
             {/* Desktop: One single line */}
-            <span className="hidden sm:inline">Some call them lies I call them ✨character development✨.</span>
+            <span className="hidden sm:inline">Some call them lies I call them ✨character development✨</span>
 
             {/* Mobile: Two lines, each stays in one line */}
             <span className="sm:hidden">
               Some call them lies{'\n'}
               <span style={{ whiteSpace: 'nowrap' }}>
-                I call them ✨character development✨.
+                I call them ✨character development✨
               </span>
             </span>
           </p>
@@ -337,7 +337,7 @@ const generateExcuse = async () => {
               onClick={generateExcuse}
               className="mt-6 w-full font-bold rounded-xl px-6 py-4 bg-blue-600 text-white transition-all duration-300 hover:shadow-lg hover:shadow-black/40 hover:bg-blue-700 text-lg sm:text-xl"
             >
-              ✨ Cook My Excuse ✨
+              Cook My Excuse
             </button>
           )}
           {step === 'loading' && (
