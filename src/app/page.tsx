@@ -211,7 +211,10 @@ const generateExcuse = async () => {
         {/* Headings */}
         <div className="text-center w-full max-w-3xl mb-8 px-4">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold whitespace-nowrap text-center"
-            style={{ textShadow: '0 2px 4px rgba(0, 0, 0, 0.6)' }}
+            style={{ textShadow: '0 2px 4px rgba(0, 0, 0, 0.6)',
+              fontSize: 'clamp(2.1rem, 5vw, 3rem)', // Responsive scaling
+             }}
+            
           >
             Bro I Had a Reason
           </h1>
@@ -249,19 +252,19 @@ const generateExcuse = async () => {
           <div className="space-y-6">
             {/* Tone Selector */}
             <div className="flex flex-col items-start">
-              <label className="text-white font-bold text-lg sm:text-xl mb-2">Pick your excuse vibe ✨</label>
+              <label className="text-white font-bold text-base sm:text-xl mb-2">Pick your excuse vibe ✨</label>
               <CustomSelect options={tones} value={tone || "Select an option"} onChange={setTone} />
             </div>
 
             {/* Category Selector */}
             <div className="flex flex-col items-start">
-              <label className="text-white font-bold text-lg sm:text-xl mb-2">What did you mess up this time? 🚩</label>
+              <label className="text-white font-bold text-base sm:text-xl mb-2">What did you mess up this time? 🚩</label>
               <CustomSelect options={categories} value={category || "Select an option"} onChange={setCategory} />
             </div>
 
             {/* Custom Situation */}
             <div className="flex flex-col items-start">
-              <label className="text-white font-bold text-lg sm:text-xl mb-2">Type your tea ☕ (Optional)</label>
+              <label className="text-white font-bold text-base sm:text-xl mb-2">Type your tea ☕ (Optional)</label>
               <input
                 type="text"
                 className="bg-transparent border border-white/30 rounded-lg px-4 py-3 w-full focus:outline-none focus:border-blue-500 text-white placeholder-white/50 text-base appearance-none"
