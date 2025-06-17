@@ -6,29 +6,48 @@ const API_KEY = process.env.GEMINI_API_KEY!;
 export async function POST(request: Request) {
   try {
     console.log('Starting API request...');
-    
+
     const { tone, category, situation } = await request.json();
     console.log('Received request data:', { tone, category, situation });
 
-    const prompt = `Yo, you're "Bro I Had a Reason" — that one chaotic best friend who always comes up with a dumb, hilarious excuse on the spot.
+    const jsonPrompt = {
+      persona: "You are 'Bro I Had a Reason' — your unhinged, genius-at-making-excuses bestie who always has your back.",
+      task: "Generate ONE short excuse.",
+      inputs: {
+        tone: tone,
+        category: category,
+        situation: situation || 'Make up something believable'
+      },
+      rules: {
+        sentence_limit: "One sentence only.",
+        language_style: "Casual, everyday language — no fancy words or robot talk.",
+        voice: "Sound like a real person (barista, roommate, coworker, chaotic best friend).",
+        situation_fallback: "If situation is blank, invent one that fits the vibe.",
+        tone_match: "Match the tone exactly. Sarcastic → roast them, Witty → clever wordplay, Believable → almost true, etc.",
+        avoid: [
+          "No AI-speak like 'As an AI'",
+          "No markdown",
+          "No intros, lists, or explanations",
+          "No labels like 'Excuse:'"
+        ],
+        output_format: "Raw excuse only. No extra text."
+      },
+      examples: [
+        {
+          tone: "Sarcastic",
+          category: "Work",
+          output: "My boss asked me to work overtime again? Nah, my dog needed therapy."
+        },
+        {
+          tone: "Believable",
+          category: "School",
+          output: "I overslept because my alarm thought today was Saturday too."
+        }
+      ],
+      final_instruction: "Now give me the perfect excuse for this setup. Only the excuse. One line. No extras."
+    };
 
-Here's what I got for you:
-- Tone: ${tone}  
-- Category: ${category}  
-- Situation: ${situation || 'Not specified'}  
-
-Now listen:
-- Give me ONE excuse only.
-- Keep it short — just ONE sentence.
-- Make it funny, unhinged, clever, or lowkey believable.
-- Don't sound like a robot or a school teacher. No big fancy words. Talk like a normal person.
-- No intros, no lists, no "As an AI" crap — just drop the excuse like it's hot.
-
-If the situation's blank, just make one up that fits the vibe.
-
-And if you give me anything other than a one-liner excuse, you're fired.
-
-Go.`;
+    const promptText = JSON.stringify(jsonPrompt, null, 2);
 
     console.log('Making request to Gemini API...');
     const response = await fetch(`${GEMINI_API_URL}?key=${API_KEY}`, {
@@ -38,13 +57,13 @@ Go.`;
       },
       body: JSON.stringify({
         contents: [{
-          parts: [{ text: prompt }]
+          parts: [{ text: promptText }]
         }]
       }),
     });
 
     console.log('API Response Status:', response.status);
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Gemini API Error:', errorData);
@@ -54,9 +73,8 @@ Go.`;
     const data = await response.json();
     console.log('Full API Response:', JSON.stringify(data, null, 2));
 
-    // Extract the excuse from the response
     const excuse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
+
     if (!excuse) {
       console.error('Invalid response format:', data);
       throw new Error('Invalid response from API');
@@ -71,4 +89,4 @@ Go.`;
       { status: 500 }
     );
   }
-} 
+}
