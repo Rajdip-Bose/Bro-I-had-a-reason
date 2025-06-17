@@ -5,6 +5,18 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 const tones = ['Sarcastic', 'Witty', 'Unhinged', 'Believable', 'Clown-certified'];
 const categories = ['Work', 'School', 'Friends', 'Relationships', 'Custom'];
 
+// Simple Toast Notification Component
+function Toast({ message, show }: { message: string; show: boolean }) {
+  return (
+    <div
+      className={`fixed bottom-4 right-4 bg-black/80 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+    >
+      {message}
+    </div>
+  );
+}
+
 export default function Home() {
   const canvasRef = useRef(null);
   const blobPoints = 60;
@@ -16,6 +28,7 @@ export default function Home() {
   const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
   const [excuse, setExcuse] = useState('');
   const [error, setError] = useState('');
+  const [showToast, setShowToast] = useState(false);
 
   // Placeholder Cycling
   const teaPlaceholders = useMemo(() => [
@@ -138,55 +151,44 @@ export default function Home() {
     }
   }, [tone, category, customReason]);
 
-  // Real API Call
-  const generateExcuse = async () => {
-    setStep('loading');
+// Real API Call
+const generateExcuse = async () => {
+  setStep('loading');
+  const loadingMessages = [
+    "Rolling the dice of fate",
+    "Consulting the council of goblins",
+    "Gaslighting in progress",
+    "Summoning chaotic energy",
+    "Rewriting history creatively"
+  ];
 
-    const loadingMessages = [
-      "Rolling the dice of fate",
-      "Consulting the council of goblins",
-      "Gaslighting in progress",
-      "Summoning chaotic energy",
-      "Rewriting history creatively"
-    ];
+  // Pick a random message
+  const selectedMessage = loadingMessages[
+    Math.floor(Math.random() * loadingMessages.length)
+  ];
 
-    // Pick a random message at start
-    const currentMessageIndex = Math.floor(Math.random() * loadingMessages.length);
-    const selectedMessage = loadingMessages[currentMessageIndex];
+  // Show full message with ...
+  setLoadingMessage(`${selectedMessage}...`);
 
-    let dotCount = 0;
-
-    const updateLoadingMessage = () => {
-      dotCount++;
-      if (dotCount <= 3) {
-        setLoadingMessage(`${selectedMessage}${'.'.repeat(dotCount)}`);
-      } else {
-        clearInterval(interval);
-
-        // Make real API call after 3 dots
-        fetch('/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tone, category, situation: customReason }),
-        })
-          .then(res => res.json())
-          .then(data => {
-            setExcuse(data.excuse);
-            setStep('result');
-          })
-          .catch(err => {
-            console.error('API Error:', err);
-            setError('Error generating excuse. Please try again.');
-            setStep('form');
-          });
-      }
-    };
-
-    const interval = setInterval(updateLoadingMessage, 500);
-    updateLoadingMessage(); // Trigger first message immediately
-
-    return () => clearInterval(interval); // Cleanup
-  };
+  // Wait 1 second, then make API call
+  setTimeout(() => {
+    fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tone, category, situation: customReason }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        setExcuse(data.excuse);
+        setStep('result');
+      })
+      .catch(err => {
+        console.error('API Error:', err);
+        setError('Error generating excuse. Please try again.');
+        setStep('form');
+      });
+  }, 1000);
+};
   const [loadingMessage, setLoadingMessage] = useState('');
 
   return (
@@ -222,21 +224,29 @@ export default function Home() {
               textShadow: '0 1px 3px rgba(0, 0, 0, 0.4)',
             }}
           >
-            Some call them lies
-            {'\n'}I call them ✨character development✨.
+            {/* Desktop: One single line */}
+            <span className="hidden sm:inline">Some call them lies I call them ✨character development✨.</span>
+
+            {/* Mobile: Two lines, each stays in one line */}
+            <span className="sm:hidden">
+              Some call them lies{'\n'}
+              <span style={{ whiteSpace: 'nowrap' }}>
+                I call them ✨character development✨.
+              </span>
+            </span>
           </p>
         </div>
 
         {/* Card */}
         <div
-          className="w-full max-w-xl p-12 md:p-16 rounded-2xl shadow-2xl backdrop-filter backdrop-blur-sm border border-white/20"
+          className="w-full max-w-md sm:max-w-lg md:max-w-xl p-6 sm:p-8 md:p-10 rounded-2xl shadow-2xl backdrop-filter backdrop-blur-sm border border-white/20"
           style={{
             background: 'radial-gradient(circle at top, rgba(30, 30, 30, 0.5), rgba(15, 15, 15, 0.7))',
             boxShadow: '0 12px 40px rgba(0, 0, 0, 0.6), inset 0 0 12px rgba(255,255,255,0.08)',
           }}
         >
           {/* Always show form fields */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Tone Selector */}
             <div className="flex flex-col items-start">
               <label className="text-white font-bold text-lg sm:text-xl mb-2">Pick your excuse vibe ✨</label>
@@ -254,7 +264,7 @@ export default function Home() {
               <label className="text-white font-bold text-lg sm:text-xl mb-2">Type your tea ☕ (Optional)</label>
               <input
                 type="text"
-                className="bg-transparent border border-white/30 rounded-lg px-4 py-3 sm:py-4 w-full focus:outline-none focus:border-blue-500 text-white placeholder-white/50 text-base sm:text-lg appearance-none"
+                className="bg-transparent border border-white/30 rounded-lg px-4 py-3 w-full focus:outline-none focus:border-blue-500 text-white placeholder-white/50 text-base appearance-none"
                 placeholder={placeholder}
                 value={customReason}
                 onChange={(e) => setCustomReason(e.target.value)}
@@ -271,34 +281,62 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Result Box */}
+          {/* Result Box with Copy Button */}
           {step === 'result' && (
             <div
-              className="mt-6 bg-yellow-100 text-black p-4 rounded-xl text-left italic shadow-inner whitespace-pre-wrap text-lg sm:text-xl"
+              className="mt-6 bg-yellow-100 text-black p-4 rounded-xl text-left italic shadow-inner whitespace-pre-wrap text-lg sm:text-xl relative"
               style={{
                 background: 'rgba(255, 255, 255, 0.1)',
                 color: 'white',
                 borderRadius: '1rem',
                 padding: '1rem',
-                boxShadow: 'inset 0 0 10px rgba(255,255,255,0.05)'
+                boxShadow: 'inset 0 0 10px rgba(255,255,255,0.05)',
               }}
             >
               {excuse}
+
+              {/* Copy Button Emoji - Positioned Bottom Right Inside Box */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(excuse);
+
+                  // Show copied notification
+                  const copiedEl = document.getElementById('copied-notification');
+                  if (copiedEl) {
+                    copiedEl.style.opacity = '1';
+                    copiedEl.style.transform = 'translateY(0)';
+                    setTimeout(() => {
+                      copiedEl.style.opacity = '0';
+                      copiedEl.style.transform = 'translateY(10px)';
+                    }, 1000);
+                  }
+                }}
+                className="absolute bottom-3 right-4 text-white/70 hover:text-white transition-all duration-200"
+                title="Copy to clipboard"
+              >
+                📋
+              </button>
+
+              {/* Copied Notification - Positioned Below Copy Button */}
+              <div
+                id="copied-notification"
+                className="absolute bottom-[-24px] right-0 px-3 py-1 bg-black/40 text-white text-sm rounded-md pointer-events-none backdrop-blur-sm transform translate-y-0 opacity-0 transition-all duration-300 whitespace-nowrap"
+              >
+                Copied!
+              </div>
             </div>
           )}
 
-          {/* Generate / Loading / Another One Button */}
+          {/* Buttons */}
           {step === 'form' && (
             <button
               onClick={generateExcuse}
-              disabled={!tone || !category}
-              className={`mt-6 w-full font-bold rounded-xl px-6 py-4 transition-all duration-300 hover:shadow-lg hover:shadow-black/40 text-lg sm:text-xl ${!tone || !category ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+              className="mt-6 w-full font-bold rounded-xl px-6 py-4 bg-blue-600 text-white transition-all duration-300 hover:shadow-lg hover:shadow-black/40 hover:bg-blue-700 text-lg sm:text-xl"
             >
               ✨ Cook My Excuse ✨
             </button>
           )}
-
           {step === 'loading' && (
             <button
               disabled
@@ -307,7 +345,6 @@ export default function Home() {
               {loadingMessage}
             </button>
           )}
-
           {step === 'result' && (
             <button
               onClick={generateExcuse}
@@ -322,6 +359,15 @@ export default function Home() {
             </button>
           )}
           {error && <p className="text-red-400 mt-4">{error}</p>}
+
+          {/* Copied Notification */}
+          <div
+            id="copied-notification"
+            className="fixed bottom-4 right-4 px-4 py-2 bg-black/30 text-white text-sm rounded-lg pointer-events-none backdrop-blur-sm transform translate-y-5 opacity-0 transition-all duration-300"
+          >
+            Copied!
+          </div>
+
         </div>
       </div>
     </div>
